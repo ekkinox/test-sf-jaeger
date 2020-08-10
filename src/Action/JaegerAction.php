@@ -43,7 +43,7 @@ class JaegerAction
         $config = new Config(
             [
                 'local_agent' => [
-                    'reporting_host' => 'demo_lti1p3_jaeger',
+                    'reporting_host' => 'test_jaeger_jaeger',
                     'reporting_port' => 5775,
                 ],
                 'sampler' => [
