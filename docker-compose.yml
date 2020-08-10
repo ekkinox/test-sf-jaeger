@@ -1,0 +1,83 @@
+version: '3'
+
+services:
+    test_jaeger_nginx:
+        container_name: test_jaeger_nginx
+        image: nginx:stable
+        networks:
+            - test_jaeger_network
+        ports:
+            - "8888:80"
+        expose:
+          - 443
+        volumes:
+            - .:/var/www/html:cached
+            - ./docker/nginx/nginx.conf:/etc/nginx/conf.d/default.conf:cached
+        working_dir: /etc/nginx/conf.d
+
+    test_jaeger_phpfpm:
+        container_name: test_jaeger_phpfpm
+        build:
+            context: ./docker/phpfpm
+        expose:
+            - 9000
+        networks:
+            - test_jaeger_network
+        volumes:
+            - .:/var/www/html:cached
+        working_dir: /var/www/html
+
+    test_jaeger_redis:
+        container_name: test_jaeger_redis
+        image: redis:latest
+        command: ["redis-server", "--appendonly", "yes"]
+        hostname: test_jaeger_redis
+        networks:
+            - test_jaeger_network
+        ports:
+            - "6379:6379"
+        volumes:
+            - test_jaeger_redis_volume:/data
+
+    test_jaeger_redis_commander:
+        container_name: test_jaeger_redis_commander
+        image: rediscommander/redis-commander:latest
+        hostname: test_jaeger_redis_commander
+        networks:
+            - test_jaeger_network
+        ports:
+            - "8081:8081"
+        expose:
+            - 8081
+        environment:
+            - REDIS_HOSTS=local:test_jaeger_redis:6379
+
+    test_jaeger_jaeger:
+        container_name: test_jaeger_jaeger
+        image: jaegertracing/all-in-one:1.18
+        hostname: test_jaeger_jaeger
+        networks:
+            - test_jaeger_network
+        ports:
+            - "5775:5775"
+            - "6831:6831"
+            - "6832:6832"
+            - "5778:5778"
+            - "16686:16686"
+            - "14268:14268"
+            - "14250:14250"
+            - "9411:9411"
+        expose:
+            - 5775
+            - 6831
+            - 6832
+            - 9411
+            - 16686
+
+volumes:
+    test_jaeger_redis_volume:
+        driver: local
+
+networks:
+    test_jaeger_network:
+        driver: bridge

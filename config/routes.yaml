@@ -1,0 +1,3 @@
+jaeger:
+    path: /jaeger
+    controller: App\Action\JaegerAction
